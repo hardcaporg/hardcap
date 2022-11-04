@@ -9,7 +9,7 @@ LDFLAGS = "-X $(PACKAGE_BASE)/version.BuildCommit=$(shell git rev-parse --short 
 build: build/agent ## Build all binaries
 
 prep:
-	-mkdir build/
+	-@mkdir build/
 
 build/agent: prep $(SRC_GO) $(SRC_DATA) ## Build agent
 	CGO_ENABLED=0 go build -ldflags $(LDFLAGS) -o build/agent ./cmd/hardcap-agent
@@ -20,4 +20,4 @@ strip: build ## Strip debug information
 
 .PHONY: clean
 clean: ## Clean build artifacts
-	-rm -rf build/
+	-@rm -rf build/

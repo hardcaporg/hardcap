@@ -42,9 +42,9 @@ func main() {
 	metricsRouter := chi.NewRouter()
 	metricsRouter.Handle(config.Prometheus.Path, promhttp.Handler())
 
-	log.Info().Msgf("Starting new instance on port %d with prometheus on %d", config.Application.Port, config.Prometheus.Port)
+	log.Info().Msgf("Starting new %s instance with prometheus on %d", config.Application.ListenAddress, config.Prometheus.Port)
 	apiServer := http.Server{
-		Addr:    fmt.Sprintf(":%d", config.Application.Port),
+		Addr:    config.Application.ListenAddress,
 		Handler: rootRouter,
 	}
 

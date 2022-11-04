@@ -1,6 +1,7 @@
+/__*
 /.idea
 /.noverify
-/cmd/hardcap-agent
 /venv/
 /cmd/agent
 /build
+/config/agent.env

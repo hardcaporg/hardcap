@@ -8,7 +8,8 @@ import (
 
 var config struct {
 	App struct {
-		Port int `env:"PORT" env-default:"8000" env-description:"HTTP port of the API service"`
+		ListenAddress     string `env:"LISTEN_ADDRESS" env-default:":8000" env-description:"listen address and port for the API"`
+		AdvertisedAddress string `env:"ADV_ADDRESS" env-default:"localhost:8000" env-description:"advertised address in templates"`
 	} `env-prefix:"APP_"`
 	Logging struct {
 		Level    string `env:"LEVEL" env-default:"info" env-description:"logger level (trace, debug, info, warn, error, fatal, panic)"`

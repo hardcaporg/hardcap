@@ -9,6 +9,7 @@ from subprocess import Popen, PIPE
 import json
 import os
 
+address = "{{ .Address }}"
 log = []
 
 def run(*cmd):

@@ -1,0 +1,29 @@
+{
+    "configurations": [
+
+        {
+            "name": "Kickstart pre",
+            "type": "python",
+            "request": "launch",
+            "program": "internal/tsrv/snip/pre.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+        },
+        {
+            "name": "Kickstart pre sudo",
+            "type": "python",
+            "request": "launch",
+            "program": "internal/tsrv/snip/pre.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "sudo": true
+        },
+        {
+            "name": "Agent",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "cmd/hardcap-agent"
+        }
+    ]
+}

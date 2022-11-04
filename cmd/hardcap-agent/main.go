@@ -21,7 +21,7 @@ import (
 )
 
 func main() {
-	//ctx := context.Background()
+	// ctx := context.Background()
 	random.SeedGlobal()
 	config.Initialize("config/agent.env")
 	logging.Initialize()

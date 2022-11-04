@@ -1,0 +1,26 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Make build",
+            "type": "process",
+            "command": "/usr/bin/make",
+            "args": [
+                "build"
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Fetch pre",
+            "type": "process",
+            "command": "/usr/bin/curl",
+            "args": [
+                "http://localhost:8000/t/ks"
+            ]
+        }
+    ]
+}

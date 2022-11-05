@@ -8,9 +8,14 @@ from pprint import pp
 from subprocess import Popen, PIPE
 import json
 import os
+import requests
+from syslog import syslog
 
 address = "{{ .Address }}"
 log = []
+
+# dev environment overrides
+if address.startswith("{{"): address = "localhost:8000"
 
 def run(*cmd):
     try:
@@ -25,7 +30,8 @@ def run(*cmd):
 
 def log_write(prefix, message):
     global log
-    log.append([prefix, message])
+    log.append([prefix, str(message)])
+    syslog(': '.join(["hardcap", prefix, str(message)]))
 
 def ks_write(line):
     with open('/tmp/pre-generated.ks', 'a') as ks:
@@ -66,5 +72,8 @@ def gather_facts():
 
 facts = gather_facts()
 print(json.dumps(facts, indent=2))
+
+r = requests.post('http://%s/r/host_register' % address, json=facts)
+log_write("register upload", r.content)
 
 # ks_write('shutdown')

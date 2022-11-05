@@ -13,7 +13,7 @@
             "name": "Kickstart pre",
             "type": "python",
             "request": "launch",
-            "program": "internal/tsrv/snip/pre.py",
+            "program": "internal/srv/snip/pre.py",
             "console": "integratedTerminal",
             "justMyCode": true,
         },
@@ -21,7 +21,7 @@
             "name": "Kickstart pre sudo",
             "type": "python",
             "request": "launch",
-            "program": "internal/tsrv/snip/pre.py",
+            "program": "internal/srv/snip/pre.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "sudo": true

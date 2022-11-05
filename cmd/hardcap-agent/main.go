@@ -14,14 +14,13 @@ import (
 	"github.com/hardcaporg/hardcap/internal/logging"
 	"github.com/hardcaporg/hardcap/internal/middleware"
 	"github.com/hardcaporg/hardcap/internal/random"
-	"github.com/hardcaporg/hardcap/internal/routes"
+	"github.com/hardcaporg/hardcap/internal/srv"
 	"github.com/hardcaporg/hardcap/internal/version"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog/log"
 )
 
 func main() {
-	// ctx := context.Background()
 	random.SeedGlobal()
 	config.Initialize("config/agent.env")
 	logging.Initialize()
@@ -32,11 +31,17 @@ func main() {
 	rootRouter.Use(middleware.TraceID)
 	rootRouter.Use(middleware.LoggerMiddleware(&log.Logger))
 
+	// Routes
 	tmplRouter := chi.NewRouter()
-
-	// Mount paths
-	routes.MountTemplateEndpoint(tmplRouter)
+	tmplRouter.Route("/ks", func(r chi.Router) {
+		r.Get("/", srv.KickstartTemplateService)
+	})
+	restRouter := chi.NewRouter()
+	restRouter.Route("/host_register", func(r chi.Router) {
+		r.Post("/", srv.RegisterHostService)
+	})
 	rootRouter.Mount("/t", tmplRouter)
+	rootRouter.Mount("/r", restRouter)
 
 	// Routes for metrics
 	metricsRouter := chi.NewRouter()

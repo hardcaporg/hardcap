@@ -10,10 +10,13 @@ require (
 	go.opentelemetry.io/otel/trace v1.11.1
 )
 
+require github.com/ajg/form v1.5.1 // indirect
+
 require (
 	github.com/BurntSushi/toml v1.2.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/go-chi/render v1.0.2
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/joho/godotenv v1.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect

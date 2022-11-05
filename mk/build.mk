@@ -1,7 +1,7 @@
 ##@ Building
 
 SRC_GO := $(shell find . -name \*.go -print)
-SRC_DATA := $(shell find internal/tsrv/snip -print)
+SRC_DATA := $(shell find internal/srv/snip -print)
 
 PACKAGE_BASE = github.com/hardcaporg/hardcap/internal
 LDFLAGS = "-X $(PACKAGE_BASE)/version.BuildCommit=$(shell git rev-parse --short HEAD) -X $(PACKAGE_BASE)/version.BuildTime=$(shell date +'%Y-%m-%d_%T')"

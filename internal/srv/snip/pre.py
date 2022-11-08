@@ -5,7 +5,7 @@
 
 from glob import glob
 from pprint import pp
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, run
 import json
 import os
 import requests
@@ -13,6 +13,7 @@ from syslog import syslog
 
 address = "{{ .Address }}"
 dmidecode = ["/usr/sbin/dmidecode"]
+poweroff = ["/usr/sbin/poweroff", "--force", "--force"]
 log = []
 
 # executed this without Go templates: dev environment overrides
@@ -21,9 +22,11 @@ if address.startswith("{"):
     address = "localhost:8000"
     # this needs to be in sudoers without password prompt in order to work
     dmidecode = ["sudo", "/usr/sbin/dmidecode"]
+    # obviously we do not want to poweroff our machines during development
+    poweroff = ["/usr/bin/true"]
 
 
-def run(*cmd):
+def run_pipe(*cmd):
     try:
         proc = Popen(cmd, stdout=PIPE, stderr=PIPE)
         proc.wait()
@@ -54,10 +57,19 @@ def gather_mac():
     return macs
 
 
+def gather_serial():
+    # also available via dmidecode but let's read it the same way as Anaconda does
+    try:
+        return open("/sys/class/dmi/id/product_serial").readline().strip()
+    except Exception:
+        return ""
+
+
 def gather_facts():
     global log
     result = {
         "mac": gather_mac(),
+        "serial": gather_serial(), # as in dracut/anaconda-ks-sendheaders.sh
         "cpu": {
             # TODO try with psutil package contains a lot of useful stuff
             "count": open('/proc/cpuinfo').read().count('processor\t:'),
@@ -74,9 +86,10 @@ def gather_facts():
                     'chassis-manufacturer', 'chassis-type', 'chassis-version', 'chassis-serial-number',
                     'chassis-asset-tag', 'processor-family', 'processor-manufacturer', 'processor-version',
                     'processor-frequency']:
-        result["dmi"][keyword] = run(*(dmidecode + ["-s", keyword]))
+        result["dmi"][keyword] = run_pipe(*(dmidecode + ["-s", keyword]))
     result["log"] = log
     return result
+
 
 facts = gather_facts()
 print(json.dumps(facts, indent=2))
@@ -84,4 +97,6 @@ print(json.dumps(facts, indent=2))
 r = requests.post('http://%s/r/host_register' % address, json=facts)
 log_write("register upload", r.content)
 
-ks_write("text\nskipx\n")
+# we are done, power off
+ks_write("# will power off")
+run(poweroff)

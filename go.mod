@@ -1,16 +1,24 @@
 module github.com/hardcaporg/hardcap
 
-go 1.19
+go 1.18
 
 require (
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/ilyakaznacheev/cleanenv v1.4.0
+	github.com/jxskiss/base62 v1.1.0
+	github.com/lzap/deagon v0.0.0-20221108193946-ebbec8ef187f
 	github.com/prometheus/client_golang v1.13.0
 	github.com/rs/zerolog v1.28.0
+	github.com/stretchr/testify v1.8.0
 	go.opentelemetry.io/otel/trace v1.11.1
 )
 
-require github.com/ajg/form v1.5.1 // indirect
+require (
+	github.com/ajg/form v1.5.1 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	golang.org/x/text v0.4.0 // indirect
+)
 
 require (
 	github.com/BurntSushi/toml v1.2.0 // indirect

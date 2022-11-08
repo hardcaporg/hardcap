@@ -1,6 +1,7 @@
 package srv
 
 import (
+	"github.com/hardcaporg/hardcap/internal/model"
 	"net/http"
 
 	"github.com/go-chi/render"
@@ -9,9 +10,12 @@ import (
 
 type RegisterHostPayload struct {
 	MacAddresses []string `json:"mac"`
-	CPU          struct {
+	Serial       string   `json:"serial"`
+
+	CPU struct {
 		Count int `json:"count"`
 	} `json:"cpu"`
+
 	DMI struct {
 		BIOSVendor            string `json:"bios-vendor"`
 		BIOSVersion           string `json:"bios-version"`
@@ -40,6 +44,7 @@ type RegisterHostPayload struct {
 		ProcessorVersion      string `json:"processor-version"`
 		ProcessorFrequency    string `json:"processor-frequency"`
 	} `json:"dmi"`
+
 	Log [][]string `json:"log"`
 }
 
@@ -56,6 +61,8 @@ func RegisterHostService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+    sid := model.NewSystemID(payload.Serial, payload.MacAddresses...)
+	logger.Trace().Msgf("System ID: %s %s %s", sid.Long, sid.Short, sid.FriendlyName)
 	logger.Debug().Msgf("Host registered: %+v", payload)
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")

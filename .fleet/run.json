@@ -14,5 +14,12 @@
             ],
             "allowParallelRun": false
         },
+        {
+            "type": "command",
+            "name": "make test",
+            "program": "/usr/bin/make",
+            "args": ["test"],
+        },
+
     ]
 }

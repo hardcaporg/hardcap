@@ -31,6 +31,13 @@ type KickstartVars struct {
 func KickstartTemplateService(w http.ResponseWriter, r *http.Request) {
 	logger := ctxval.Logger(r.Context())
 
+    for name, values := range r.Header {
+        // Loop over all values for the name.
+        for _, value := range values {
+            logger.Debug().Msgf("%s: %s", name, value)
+        }
+    }
+    
 	vars := KickstartVars{
 		BuildCommit: version.BuildCommit,
 		BuildTime:   version.BuildTime,

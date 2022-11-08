@@ -20,6 +20,8 @@ This document describes some of my initial thoughts of what hardcap could be, it
   * A `hca-libvirt` plugin provides the same but for libvirt.
 * A **hardcap-cli** is a command line utility for interacting with multiple controllers (`hcli`).
 
+Both controller and agent are single binary, it can work in dual mode (controller with agent).
+
 ## The workflow
 
 Hardware must be registered first either manually or automatically via chassis detection over OOB (Redfish), then it's powered on booting into Anaconda which discovers them and provides more hardware details. Cloud portal users initiate OS installation which makes them provisioned until they are acquired for production use. Once released, hosts can be optionally wiped and returned back to the discovered state. The workflow:

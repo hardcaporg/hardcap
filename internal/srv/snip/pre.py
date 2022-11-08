@@ -12,10 +12,16 @@ import requests
 from syslog import syslog
 
 address = "{{ .Address }}"
+dmidecode = ["/usr/sbin/dmidecode"]
 log = []
 
-# dev environment overrides
-if address.startswith("{{"): address = "localhost:8000"
+# executed this without Go templates: dev environment overrides
+if address.startswith("{"):
+    # connect to localhost rather than value from template
+    address = "localhost:8000"
+    # this needs to be in sudoers without password prompt in order to work
+    dmidecode = ["sudo", "/usr/sbin/dmidecode"]
+
 
 def run(*cmd):
     try:
@@ -28,10 +34,12 @@ def run(*cmd):
     except FileNotFoundError:
         return ""
 
+
 def log_write(prefix, message):
     global log
     log.append([prefix, str(message)])
     syslog(': '.join(["hardcap", prefix, str(message)]))
+
 
 def ks_write(line):
     with open('/tmp/pre-generated.ks', 'a') as ks:
@@ -42,13 +50,13 @@ def gather_mac():
     macs = []
     for name in glob("/sys/class/net/*/address"):
         mac = open(name).readline().strip()
-        if len(mac) > 0: macs.append(mac)
+        if len(mac) > 0 and mac != "00:00:00:00:00:00": macs.append(mac)
     return macs
 
 
 def gather_facts():
     global log
-    facts = {
+    result = {
         "mac": gather_mac(),
         "cpu": {
             # TODO try with psutil package contains a lot of useful stuff
@@ -60,15 +68,15 @@ def gather_facts():
         "dmi": {},
     }
     for keyword in ['bios-vendor', 'bios-version', 'bios-release-date', 'bios-revision', 'firmware-revision',
-                    'system-manufacturer', 'system-product-name', 'systemK-version', 'system-serial-number',
+                    'system-manufacturer', 'system-product-name', 'system-version', 'system-serial-number',
                     'system-uuid', 'system-sku-number', 'system-family', 'baseboard-manufacturer',
                     'baseboard-product-name', 'baseboard-version', 'baseboard-serial-number', 'baseboard-asset-tag',
                     'chassis-manufacturer', 'chassis-type', 'chassis-version', 'chassis-serial-number',
                     'chassis-asset-tag', 'processor-family', 'processor-manufacturer', 'processor-version',
                     'processor-frequency']:
-        facts["dmi"][keyword] = run("dmidecode", "-s", keyword)
-    facts["log"] = log
-    return facts
+        result["dmi"][keyword] = run(*(dmidecode + ["-s", keyword]))
+    result["log"] = log
+    return result
 
 facts = gather_facts()
 print(json.dumps(facts, indent=2))
@@ -76,4 +84,4 @@ print(json.dumps(facts, indent=2))
 r = requests.post('http://%s/r/host_register' % address, json=facts)
 log_write("register upload", r.content)
 
-# ks_write('shutdown')
+ks_write("text\nskipx\n")

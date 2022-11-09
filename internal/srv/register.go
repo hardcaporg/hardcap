@@ -1,7 +1,8 @@
 package srv
 
 import (
-	"github.com/hardcaporg/hardcap/internal/model"
+    "github.com/hardcaporg/hardcap/internal/db"
+    "github.com/hardcaporg/hardcap/internal/model"
 	"net/http"
 
 	"github.com/go-chi/render"
@@ -37,7 +38,7 @@ type RegisterHostPayload struct {
 		ChassisManufacturer   string `json:"chassis-manufacturer"`
 		ChassisType           string `json:"chassis-type"`
 		ChassisVersion        string `json:"chassis-version"`
-		ChassisNumber         string `json:"chassis-serial-number"`
+		ChassisSerialNumber   string `json:"chassis-serial-number"`
 		ChassisAssetTag       string `json:"chassis-asset-tag"`
 		ProcessorFamily       string `json:"processor-family"`
 		ProcessorManufacturer string `json:"processor-manufacturer"`
@@ -61,8 +62,43 @@ func RegisterHostService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-    sid := model.NewSystemID(payload.Serial, payload.MacAddresses...)
+	sid := model.NewSystemID(payload.Serial, payload.MacAddresses...)
 	logger.Trace().Msgf("System ID: %s %s %s", sid.Long, sid.Short, sid.FriendlyName)
+
+	registration := model.Registration{
+		Sid:                   sid.Long,
+		Name:                  sid.FriendlyName,
+		BiosVendor:            payload.DMI.BIOSVendor,
+		BiosVersion:           payload.DMI.BIOSVersion,
+		BiosReleaseDate:       payload.DMI.BIOSReleaseDate,
+		BiosRevision:          payload.DMI.BIOSRevision,
+		FirmwareRevision:      payload.DMI.FirmwareRevision,
+		SystemManufacturer:    payload.DMI.SystemManufacturer,
+		SystemProductName:     payload.DMI.SystemProductName,
+		SystemVersion:         payload.DMI.SystemVersion,
+		SystemSerialNumber:    payload.DMI.SystemSerialNumber,
+		SystemUUID:            payload.DMI.SystemUUID,
+		SystemSkuNumber:       payload.DMI.SystemSKUNumber,
+		SystemFamily:          payload.DMI.SystemFamily,
+		BaseboardManufacturer: payload.DMI.BaseboardManufacturer,
+		BaseboardProductName:  payload.DMI.BaseboardProductName,
+		BaseboardVersion:      payload.DMI.BaseboardVersion,
+		BaseboardSerialNumber: payload.DMI.BaseboardSerialNumber,
+		BaseboardAssetTag:     payload.DMI.BaseboardAssetTag,
+		ChassisManufacturer:   payload.DMI.ChassisManufacturer,
+		ChassisType:           payload.DMI.ChassisType,
+		ChassisVersion:        payload.DMI.ChassisVersion,
+		ChassisSerialNumber:   payload.DMI.ChassisSerialNumber,
+		ChassisAssetTag:       payload.DMI.ChassisAssetTag,
+		ProcessorFamily:       payload.DMI.ProcessorFamily,
+		ProcessorManufacturer: payload.DMI.ProcessorManufacturer,
+		ProcessorVersion:      payload.DMI.ProcessorVersion,
+		ProcessorFrequency:    payload.DMI.ProcessorFrequency,
+	}
+    err := db.Registration.Create(&registration)
+    if err != nil {
+        panic(err) 
+    }
 	logger.Debug().Msgf("Host registered: %+v", payload)
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")

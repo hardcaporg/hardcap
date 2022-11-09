@@ -2,8 +2,12 @@ package srv
 
 import (
 	"bytes"
-    "github.com/hardcaporg/hardcap/internal/model"
-    "net/http"
+	"context"
+	"errors"
+	"github.com/hardcaporg/hardcap/internal/db"
+	"github.com/hardcaporg/hardcap/internal/model"
+	"gorm.io/gorm"
+	"net/http"
 	"strings"
 	"text/template"
 
@@ -30,44 +34,14 @@ type KickstartVars struct {
 	Address     string
 }
 
-func KickstartTemplateService(w http.ResponseWriter, r *http.Request) {
-	logger := ctxval.Logger(r.Context())
+var vars = KickstartVars{
+	BuildCommit: version.BuildCommit,
+	BuildTime:   version.BuildTime,
+	Address:     config.Application.AdvertisedAddress,
+}
 
-    var serial string
-    var macs []string
-    if serials, ok := r.Header["X-System-Serial-Number"]; ok && len(serials) == 1 {
-        serial = serials[0]
-	} else {
-        logger.Warn().Msg("Kickstart request without X-System-Serial-Number, use inst.ks.sendsn kernel option (VM perhaps)")
-    }
-    seenMAC := false
-	for name, values := range r.Header {
-		for _, value := range values {
-            logger.Trace().Msgf("HTTP header '%s': '%s'", name, value)
-            if strings.HasPrefix(name, "X-Rhn-Provisioning-Mac") {
-				nameAndMAC := strings.Split(value, " ")
-				if len(nameAndMAC) == 2 {
-					macs = append(macs, nameAndMAC[1])
-                    seenMAC = true
-				} else {
-                    logger.Warn().Msgf("X-RHN-Provisioning-MAC unexpected format: '%s'", nameAndMAC)
-                }
-			}
-		}
-	}
-    if !seenMAC {
-        logger.Warn().Msg("Kickstart request without X-RHN-Provisioning-MAC, use inst.ks.sendmac kernel option")
-    }
-    
-    logger.Trace().Msgf("Generating ID: %+v %+v", serial, macs)
-    sid := model.NewSystemID(serial, macs...)
-    logger.Trace().Msgf("System ID: %s %s %s", sid.Long, sid.Short, sid.FriendlyName)
-
-	vars := KickstartVars{
-		BuildCommit: version.BuildCommit,
-		BuildTime:   version.BuildTime,
-		Address:     config.Application.AdvertisedAddress,
-	}
+func renderRegistration(ctx context.Context) []byte {
+	logger := ctxval.Logger(ctx)
 
 	preTemplate, err := snip.EmbedFS.ReadFile("pre.py")
 	if err != nil {
@@ -86,10 +60,76 @@ func KickstartTemplateService(w http.ResponseWriter, r *http.Request) {
 	buf = bytes.NewBuffer(nil)
 	err = t.Execute(buf, vars)
 	if err != nil {
+		logger.Error().Err(err).Msg("Unable to render registration kickstart template")
+	}
+
+	return buf.Bytes()
+}
+
+func renderKickstart(ctx context.Context) []byte {
+	logger := ctxval.Logger(ctx)
+
+	ks, err := snip.EmbedFS.ReadFile("rawhide.ks")
+	if err != nil {
+		logger.Error().Err(err).Msg("Unable to read pre template")
+	}
+
+	t := template.Must(template.New("ks").Parse(string(ks)))
+	buf := bytes.NewBuffer(nil)
+	err = t.Execute(buf, vars)
+	if err != nil {
 		logger.Error().Err(err).Msg("Unable to render kickstart template")
 	}
 
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write(buf.Bytes())
+	return buf.Bytes()
+}
+
+func KickstartTemplateService(w http.ResponseWriter, r *http.Request) {
+	logger := ctxval.Logger(r.Context())
+
+	var serial string
+	var macs []string
+	if serials, ok := r.Header["X-System-Serial-Number"]; ok && len(serials) == 1 {
+		serial = serials[0]
+	} else {
+		logger.Warn().Msg("Kickstart request without X-System-Serial-Number, use inst.ks.sendsn kernel option (VM perhaps)")
+	}
+	seenMAC := false
+	for name, values := range r.Header {
+		for _, value := range values {
+			logger.Trace().Msgf("HTTP header '%s': '%s'", name, value)
+			if strings.HasPrefix(name, "X-Rhn-Provisioning-Mac") {
+				nameAndMAC := strings.Split(value, " ")
+				if len(nameAndMAC) == 2 {
+					macs = append(macs, nameAndMAC[1])
+					seenMAC = true
+				} else {
+					logger.Warn().Msgf("X-RHN-Provisioning-MAC unexpected format: '%s'", nameAndMAC)
+				}
+			}
+		}
+	}
+	if !seenMAC {
+		logger.Warn().Msg("Kickstart request without X-RHN-Provisioning-MAC, use inst.ks.sendmac kernel option")
+	}
+
+	sid := model.NewSystemID(serial, macs...)
+
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+
+	registration, err := db.Registration.GetBySID(sid.Long)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+        logger.Info().Msgf("Registration of system ID: %s %s", sid.Long, sid.FriendlyName)
+        w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(renderRegistration(r.Context()))
+	} else if err != nil {
+		panic(err)
+	} else {
+        logger.Info().Msgf("Installation of system ID: %s %s", sid.Long, sid.FriendlyName)
+        // TODO: pass this into the template
+		_ = registration.BaseboardAssetTag
+
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(renderKickstart(r.Context()))
+	}
 }

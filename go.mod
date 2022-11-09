@@ -11,13 +11,34 @@ require (
 	github.com/rs/zerolog v1.28.0
 	github.com/stretchr/testify v1.8.0
 	go.opentelemetry.io/otel/trace v1.11.1
+	gorm.io/driver/sqlite v1.4.3
+	gorm.io/gen v0.3.18
+	gorm.io/gorm v1.24.1
 )
 
 require (
 	github.com/ajg/form v1.5.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/glebarez/go-sqlite v1.19.1 // indirect
+	github.com/glebarez/sqlite v1.5.0 // indirect
+	github.com/go-sql-driver/mysql v1.6.0 // indirect
+	github.com/google/uuid v1.3.0 // indirect
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/mattn/go-sqlite3 v1.14.15 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
+	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
 	golang.org/x/text v0.4.0 // indirect
+	golang.org/x/tools v0.1.12 // indirect
+	gorm.io/datatypes v1.0.7 // indirect
+	gorm.io/driver/mysql v1.4.0 // indirect
+	gorm.io/hints v1.1.0 // indirect
+	gorm.io/plugin/dbresolver v1.3.0 // indirect
+	modernc.org/libc v1.19.0 // indirect
+	modernc.org/mathutil v1.5.0 // indirect
+	modernc.org/memory v1.4.0 // indirect
+	modernc.org/sqlite v1.19.1 // indirect
 )
 
 require (

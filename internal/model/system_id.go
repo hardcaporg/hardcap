@@ -16,7 +16,7 @@ type SystemID struct {
 	// Base62-enconded 128-bit string id that not cryptographically safe, likely unique
 	Short string
 
-	// Friendly name, might not unique, only to be used as a "display" name
+	// Friendly name based on 25-bit, hopefully unique, only to be used as a "display" name
 	FriendlyName string
 }
 

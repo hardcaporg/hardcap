@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/hardcaporg/hardcap/internal/config"
+	"github.com/hardcaporg/hardcap/internal/db"
 	"github.com/hardcaporg/hardcap/internal/logging"
 	"github.com/hardcaporg/hardcap/internal/middleware"
 	"github.com/hardcaporg/hardcap/internal/random"
@@ -24,6 +25,8 @@ func main() {
 	random.SeedGlobal()
 	config.Initialize("config/agent.env")
 	logging.Initialize()
+
+	db.Initialize()
 
 	rootRouter := chi.NewRouter()
 	rootRouter.Use(middleware.NewPatternMiddleware(version.Hostname))

@@ -26,13 +26,23 @@ Both controller and agent are single binary, it can work in dual mode (controlle
 
 Hardware must be registered first either manually or automatically via chassis detection over OOB (Redfish), then it's powered on booting into Anaconda which discovers them and provides more hardware details. Cloud portal users initiate OS installation which makes them provisioned until they are acquired for production use. Once released, hosts can be optionally wiped and returned back to the discovered state. The workflow:
 
-1. Host is **registered** by manually entering OOB credentials or via chassis auto-registration. There can be OOB drivers for virtualized environments too (e.g. Intel or z/VM).
-2. Host is **discovered** by booting into Anaconda which sends hardware facts and waits for provisioning.
-3. Host can be optionally **powered off** until it's requested to be provisioned, or it can stay in the discovered state forever. Host can be optionally provisioned into hardware testing images (firmware update, CPU/memory tests) and then powered off.
-4. Host is **provisioned** when Anaconda gets a command for installation with credentials (ssh keys, root password). Any Anaconda provisioning type is supported: RPM, ostree, image-based.
-5. Host is **acquired** when the system must be allocated for use, a list of facts about the system is returned (e.g. MAC/IP address). Provisioning and acquisition is usually done in one step.
-6. Host is **released** when it is no longer needed. Optional wipe flag can be set.
-7. Host is **wiped** after it boots into Anaconda and performs storage cleanup. This is optional. Then it returns to the discovered state.
+1. Appliance is registered by entering its credentials (Redfish, IPMI, VMWare, RHEL).
+1. Systems from an appliance are enlisted automatically. Optionally systems can be enlisted manually but no power operations will be possible.
+1. A system is turned on via CLI/API and discovered by booting into Anaconda which sends hardware facts and powers off. Multiple discovery scripts can be optionally configured (perform memory test, upgrade firmware) too.
+1. When a system is acquired, it is powered on again, Anaconda boots up and proceeds provisioning from a kickstart template downloaded from the service. All installation scenarios are supported: RPM, ostree, image-based.
+1. When a host is released, it is marked as available and optionally wiped using a special discovery script after which it is powered off and returns to discovered state.
+
+Registration:
+
+hardcap appliance register --name lv7 --type libvirt --host libvirt07.dc13.example.com --prefix=hc --user root --ask-password
+
+hardcap appliance list
+
+hardcap appliance enlist --all --discover
+
+Discovery
+
+hardcap system discover --name hc-21 --appliance lv7
 
 Hardware detection is implemented as an Anaconda `%pre` install script (Bash/Python) which is important for providers with limited capabilities (IPMI). Host can immediately continue provisioning, or it can be powered off until it is requested by an operator. Notable hardware facts reported:
 

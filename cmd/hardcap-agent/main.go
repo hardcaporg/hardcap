@@ -1,32 +1,40 @@
 package main
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
-
-	"github.com/go-chi/chi/v5"
-	"github.com/hardcaporg/hardcap/internal/config"
-	"github.com/hardcaporg/hardcap/internal/db"
-	"github.com/hardcaporg/hardcap/internal/logging"
-	"github.com/hardcaporg/hardcap/internal/middleware"
-	"github.com/hardcaporg/hardcap/internal/random"
-	"github.com/hardcaporg/hardcap/internal/srv"
-	"github.com/hardcaporg/hardcap/internal/version"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/rs/zerolog/log"
+    "context"
+    "errors"
+    "fmt"
+    "github.com/go-chi/chi/v5"
+    "github.com/hardcaporg/hardcap/internal/config"
+    "github.com/hardcaporg/hardcap/internal/db"
+    "github.com/hardcaporg/hardcap/internal/logging"
+    "github.com/hardcaporg/hardcap/internal/middleware"
+    "github.com/hardcaporg/hardcap/internal/random"
+    "github.com/hardcaporg/hardcap/internal/rpc/server"
+    "github.com/hardcaporg/hardcap/internal/srv"
+    "github.com/hardcaporg/hardcap/internal/version"
+    "github.com/prometheus/client_golang/prometheus/promhttp"
+    "github.com/rs/zerolog/log"
+    "net/http"
+    "os"
+    "os/signal"
+    "syscall"
 )
 
 func main() {
+    ctx := context.Background()
 	random.SeedGlobal()
 	config.Initialize("config/agent.env")
 	logging.Initialize()
+    config.PrintConfig(ctx)
 
 	db.Initialize()
+
+    err := server.Initialize(ctx)
+    if err != nil {
+        log.Fatal().Err(err).Msg("Cannot initialize RPC server")
+        return
+    }
 
 	rootRouter := chi.NewRouter()
 	rootRouter.Use(middleware.NewPatternMiddleware(version.Hostname))
@@ -50,9 +58,9 @@ func main() {
 	metricsRouter := chi.NewRouter()
 	metricsRouter.Handle(config.Prometheus.Path, promhttp.Handler())
 
-	log.Info().Msgf("Starting new %s instance with prometheus on %d", config.Application.ListenAddress, config.Prometheus.Port)
+	log.Info().Msgf("Starting new %s instance with prometheus on %d", config.Application.HttpListenAddress, config.Prometheus.Port)
 	apiServer := http.Server{
-		Addr:    config.Application.ListenAddress,
+		Addr:    config.Application.HttpListenAddress,
 		Handler: rootRouter,
 	}
 

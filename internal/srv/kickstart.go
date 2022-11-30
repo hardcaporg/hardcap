@@ -34,14 +34,13 @@ type KickstartVars struct {
 	Address     string
 }
 
-var vars = KickstartVars{
-	BuildCommit: version.BuildCommit,
-	BuildTime:   version.BuildTime,
-	Address:     config.Application.AdvertisedAddress,
-}
-
 func renderRegistration(ctx context.Context) []byte {
 	logger := ctxval.Logger(ctx)
+    var vars = KickstartVars{
+        BuildCommit: version.BuildCommit,
+        BuildTime:   version.BuildTime,
+        Address:     config.Application.AdvertisedAddress,
+    }
 
 	preTemplate, err := snip.EmbedFS.ReadFile("pre.py")
 	if err != nil {
@@ -63,13 +62,21 @@ func renderRegistration(ctx context.Context) []byte {
 		logger.Error().Err(err).Msg("Unable to render registration kickstart template")
 	}
 
-	return buf.Bytes()
+    logger.Trace().Bytes("ks", buf.Bytes()).Msg("Template rendered")
+    return buf.Bytes()
 }
 
 func renderKickstart(ctx context.Context) []byte {
 	logger := ctxval.Logger(ctx)
+    var vars = KickstartVars{
+        BuildCommit: version.BuildCommit,
+        BuildTime:   version.BuildTime,
+        Address:     config.Application.AdvertisedAddress,
+    }
 
-	ks, err := snip.EmbedFS.ReadFile("rawhide.ks")
+    //ksFile := "rawhide.ks"
+    ksFile := "liveimg.ks"
+    ks, err := snip.EmbedFS.ReadFile(ksFile)
 	if err != nil {
 		logger.Error().Err(err).Msg("Unable to read pre template")
 	}
@@ -81,7 +88,8 @@ func renderKickstart(ctx context.Context) []byte {
 		logger.Error().Err(err).Msg("Unable to render kickstart template")
 	}
 
-	return buf.Bytes()
+    logger.Trace().Bytes("ks", buf.Bytes()).Msg("Template rendered")
+    return buf.Bytes()
 }
 
 func KickstartTemplateService(w http.ResponseWriter, r *http.Request) {

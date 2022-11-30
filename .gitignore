@@ -5,3 +5,4 @@
 /cmd/agent
 /build
 /config/agent.env
+__pycache__

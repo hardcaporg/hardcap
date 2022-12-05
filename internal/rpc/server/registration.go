@@ -2,26 +2,18 @@ package server
 
 import (
     "github.com/hardcaporg/hardcap/internal/db"
-    "github.com/hardcaporg/hardcap/internal/model"
+    "github.com/hardcaporg/hardcap/internal/rpc/common"
 )
 
 type Registration struct{}
 
-type RegistrationsListArgs struct {
-    Limit, Offset int
-}
-
-type RegistrationsListReply struct {
-    List []*model.Registration
-}
-
-func (s *Registration) List(args RegistrationsListArgs, reply *RegistrationsListReply) error {
+func (s *Registration) List(args common.RegistrationListArgs, reply *common.RegistrationListReply) error {
     var err error
     if args.Limit == 0 {
         args.Limit = 100
     }
 
-    reply.List, _, err = db.Registration.FindByPage(args.Limit, args.Offset)
+    reply.List, _, err = db.Registration.FindByPage(args.Offset, args.Limit)
     if err != nil {
         return err
     }

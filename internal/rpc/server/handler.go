@@ -11,10 +11,17 @@ import (
 
 func Initialize(ctx context.Context) error {
     log := ctxval.Logger(ctx)
+
     err := rpc.Register(new(Registration))
     if err != nil {
         return err
     }
+
+    err = rpc.Register(new(Appliance))
+    if err != nil {
+        return err
+    }
+
     rpc.HandleHTTP()
     l, listenErr := net.Listen("tcp", config.Application.RpcListenAddress)
     if listenErr != nil {

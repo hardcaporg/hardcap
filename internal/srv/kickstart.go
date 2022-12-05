@@ -127,7 +127,7 @@ func KickstartTemplateService(w http.ResponseWriter, r *http.Request) {
 
 	registration, err := db.Registration.GetBySID(sid.Long)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-        logger.Info().Msgf("Registration of system ID: %s %s", sid.Long, sid.FriendlyName)
+        logger.Info().Msgf("Appliance of system ID: %s %s", sid.Long, sid.FriendlyName)
         w.WriteHeader(http.StatusOK)
 		_, _ = w.Write(renderRegistration(r.Context()))
 	} else if err != nil {

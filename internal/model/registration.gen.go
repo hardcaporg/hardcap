@@ -4,9 +4,9 @@
 
 package model
 
-const TableNameRegistration = "registrations"
+const TableNameRegistration = "registration"
 
-// Registration mapped from table <registrations>
+// Registration mapped from table <registration>
 type Registration struct {
 	ID                    int32  `gorm:"column:id;primaryKey" json:"id"`
 	Sid                   string `gorm:"column:sid;not null" json:"sid"`

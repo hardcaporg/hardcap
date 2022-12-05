@@ -1,13 +1,18 @@
 package db
 
-import "github.com/glebarez/sqlite"
+import (
+    "github.com/glebarez/sqlite"
+    "gorm.io/gorm/logger"
+)
 import "gorm.io/gorm"
 
 var Pool *gorm.DB
 
 func Initialize() {
 	var err error
-	Pool, err = gorm.Open(sqlite.Open(":memory:?_pragma=foreign_keys(1)"), &gorm.Config{})
+	Pool, err = gorm.Open(sqlite.Open(":memory:?_pragma=foreign_keys(1)"), &gorm.Config{
+        Logger: logger.Default.LogMode(logger.Info),
+    })
 	if err != nil {
 		panic(err)
 	}
@@ -15,7 +20,14 @@ func Initialize() {
     SetDefault(Pool)
 
     Pool.Exec(`
-create table registrations (
+
+create table appliance (
+    id integer not null primary key autoincrement,
+    name text not null,
+    url text not null
+);
+
+create table registration (
     id integer not null primary key autoincrement,
     sid text not null,
     name text not null,
@@ -45,6 +57,7 @@ create table registrations (
     processor_manufacturer text,
     processor_version text,
     processor_frequency text
-)
+);
+
 `)
 }

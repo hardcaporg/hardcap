@@ -17,8 +17,8 @@ func TestList(t *testing.T) {
     setupOnce.Do(setup)
     
     r := Registration{}
-    reply := &RegistrationsListReply{}
-    err := r.List(RegistrationsListArgs{
+    reply := &ApplianceListReply{}
+    err := r.List(ApplianceListArgs{
         Limit:  0,
         Offset: 0,
     }, reply)

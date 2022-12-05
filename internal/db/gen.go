@@ -17,17 +17,20 @@ import (
 
 var (
 	Q            = new(Query)
+	Appliance    *appliance
 	Registration *registration
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
+	Appliance = &Q.Appliance
 	Registration = &Q.Registration
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
 		db:           db,
+		Appliance:    newAppliance(db, opts...),
 		Registration: newRegistration(db, opts...),
 	}
 }
@@ -35,6 +38,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 type Query struct {
 	db *gorm.DB
 
+	Appliance    appliance
 	Registration registration
 }
 
@@ -43,6 +47,7 @@ func (q *Query) Available() bool { return q.db != nil }
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
 		db:           db,
+		Appliance:    q.Appliance.clone(db),
 		Registration: q.Registration.clone(db),
 	}
 }
@@ -58,16 +63,19 @@ func (q *Query) WriteDB() *Query {
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
 		db:           db,
+		Appliance:    q.Appliance.replaceDB(db),
 		Registration: q.Registration.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
+	Appliance    IApplianceDo
 	Registration IRegistrationDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
+		Appliance:    q.Appliance.WithContext(ctx),
 		Registration: q.Registration.WithContext(ctx),
 	}
 }

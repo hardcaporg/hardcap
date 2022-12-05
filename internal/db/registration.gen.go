@@ -271,7 +271,7 @@ func (r registrationDo) GetByID(id int) (result model.Registration, err error) {
 
 	var generateSQL strings.Builder
 	params = append(params, id)
-	generateSQL.WriteString("SELECT * FROM registrations WHERE id=? ")
+	generateSQL.WriteString("SELECT * FROM registration WHERE id=? ")
 
 	var executeSQL *gorm.DB
 
@@ -286,7 +286,7 @@ func (r registrationDo) GetBySID(sid string) (result model.Registration, err err
 
 	var generateSQL strings.Builder
 	params = append(params, sid)
-	generateSQL.WriteString("SELECT * FROM registrations WHERE sid=? ")
+	generateSQL.WriteString("SELECT * FROM registration WHERE sid=? ")
 
 	var executeSQL *gorm.DB
 

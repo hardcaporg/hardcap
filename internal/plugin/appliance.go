@@ -10,7 +10,7 @@ import (
     "os/exec"
 )
 
-type Appliance struct {
+type AppliancePlugin struct {
     proc *cmd.Command
 }
 
@@ -19,7 +19,7 @@ func logger(ctx context.Context) *zerolog.Logger {
     return &logger
 }
 
-func StartAppliance(ctx context.Context, commandName string, commandArgs ...string) (*Appliance, error) {
+func StartAppliance(ctx context.Context, commandName string, commandArgs ...string) (*AppliancePlugin, error) {
     log := logger(ctx)
 
     log.Debug().Msgf("Starting plugin %s %v", commandName, commandArgs)
@@ -32,7 +32,7 @@ func StartAppliance(ctx context.Context, commandName string, commandArgs ...stri
         return nil, fmt.Errorf("cannot start plugin: %w", err)
     }
 
-    return &Appliance{
+    return &AppliancePlugin{
         proc: proc,
     }, nil
 }
@@ -45,7 +45,7 @@ type ApplianceMultiplyReply struct {
     C int
 }
 
-func (plugin *Appliance) Multiply(ctx context.Context, args *ApplianceMultiplyArgs) (*ApplianceMultiplyReply, error) {
+func (plugin *AppliancePlugin) Multiply(ctx context.Context, args *ApplianceMultiplyArgs) (*ApplianceMultiplyReply, error) {
     reply := &ApplianceMultiplyReply{}
 
     err := plugin.proc.Call(ctx, "Arith.Multiply", args, &reply)
@@ -72,7 +72,7 @@ type ApplianceEnlistReply struct {
     Systems []EnlistedSystem
 }
 
-func (plugin *Appliance) Enlist(ctx context.Context, args *ApplianceEnlistArgs) (*ApplianceEnlistReply, error) {
+func (plugin *AppliancePlugin) Enlist(ctx context.Context, args *ApplianceEnlistArgs) (*ApplianceEnlistReply, error) {
     reply := &ApplianceEnlistReply{}
 
     err := plugin.proc.Call(ctx, "Appliance.Enlist", args, &reply)
@@ -83,7 +83,7 @@ func (plugin *Appliance) Enlist(ctx context.Context, args *ApplianceEnlistArgs) 
     return reply, nil
 }
 
-func (plugin *Appliance) Stop(ctx context.Context) error {
+func (plugin *AppliancePlugin) Stop(ctx context.Context) error {
     log := logger(ctx)
 
     log.Debug().Msg("Stopping plugin")

@@ -128,6 +128,7 @@ server.register("Arith.Multiply", multiply)
 server.register("Appliance.Enlist", enlist)
 
 if __name__ == '__main__':
+    log("Starting libvirt appliance plugin")
     while not sys.stdin.buffer.closed:
         try:
             req = Request.load(sys.stdin.buffer)

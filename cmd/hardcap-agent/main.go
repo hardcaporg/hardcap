@@ -31,18 +31,18 @@ func main() {
 
 	db.Initialize()
 
-    appliance, err := plugin.StartAppliance(ctx, "python3", "plugins/appliance-libvirt/appliance.py")
+    err := plugin.StartAll(ctx)
     if err != nil {
-        log.Fatal().Err(err).Msg("Cannot initialize appliance plugin")
+        log.Fatal().Err(err).Msg("Cannot initialize plugins")
         return
     }
-    defer appliance.Stop(ctx)
+    defer plugin.StopAll(ctx)
 
     args := &plugin.ApplianceEnlistArgs{
         URL:         "qemu:///system",
         NamePattern: "^hardcap.*",
     }
-    reply, err := appliance.Enlist(ctx, args)
+    reply, err := plugin.Appliance.Enlist(ctx, args)
     if err != nil {
         log.Fatal().Err(err).Msg("Cannot call appliance plugin")
         return

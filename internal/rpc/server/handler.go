@@ -22,6 +22,11 @@ func Initialize(ctx context.Context) error {
         return err
     }
 
+    err = rpc.Register(new(System))
+    if err != nil {
+        return err
+    }
+
     rpc.HandleHTTP()
     l, listenErr := net.Listen("tcp", config.Application.RpcListenAddress)
     if listenErr != nil {

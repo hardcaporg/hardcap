@@ -14,9 +14,9 @@ func ApplianceClient(c *rpc.Client) *Appliance {
 }
 
 func (obj *Appliance) List(args common.ApplianceListArgs, reply *common.ApplianceListReply) error {
-    return obj.c.Call("Appliance.List", args, reply)
+    return obj.c.Call("System.List", args, reply)
 }
 
 func (obj *Appliance) Register(args common.ApplianceRegisterArgs, reply *common.ApplianceRegisterReply) error {
-    return obj.c.Call("Appliance.Register", args, reply)
+    return obj.c.Call("System.Register", args, reply)
 }

@@ -16,6 +16,11 @@ type Appliance interface {
     GetByID(id int) (gen.T, error)
 }
 
+type System interface {
+    // SELECT * FROM @@table WHERE id=@id
+    GetByID(id int) (gen.T, error)
+}
+
 func main() {
     g := gen.NewGenerator(gen.Config{
         OutPath: "../../internal/db",
@@ -25,8 +30,10 @@ func main() {
     db.Initialize()
     g.UseDB(db.Pool)
     g.GenerateModel("appliance", gen.FieldType("id", "int64"))
+    g.GenerateModel("system", gen.FieldType("id", "int64"))
     g.GenerateModel("registration", gen.FieldType("id", "int64"))
     g.ApplyInterface(func(Registration){}, g.GenerateModel("registration"))
+    g.ApplyInterface(func(System){}, g.GenerateModel("system"))
     g.ApplyInterface(func(Appliance){}, g.GenerateModel("appliance"))
 
     g.Execute()

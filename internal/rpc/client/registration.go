@@ -14,5 +14,5 @@ func RegistrationClient(c *rpc.Client) *Registration {
 }
 
 func (obj *Registration) List(args common.RegistrationListArgs, reply *common.RegistrationListReply) error {
-    return obj.c.Call("Appliance.List", args, reply)
+    return obj.c.Call("System.List", args, reply)
 }

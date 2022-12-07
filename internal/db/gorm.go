@@ -27,6 +27,17 @@ create table appliance (
     url text not null
 );
 
+insert into appliance (name, url) values ("my libvirt", "qemu:///system?match=hardcap.*");
+
+create table system (
+    id integer not null primary key autoincrement,
+    appliance_id integer not null,
+    name text,
+    uid text not null,
+    sid text not null,
+    foreign key(appliance_id) references appliance(id)
+);
+
 create table registration (
     id integer not null primary key autoincrement,
     sid text not null,

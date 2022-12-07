@@ -1,15 +1,15 @@
 package main
 
 import (
-    "github.com/hardcaporg/hardcap/internal/model"
-    "github.com/hardcaporg/hardcap/internal/rpc/client"
-    "github.com/hardcaporg/hardcap/internal/rpc/common"
-    "log"
-    "net/rpc"
-    "os"
+	"github.com/hardcaporg/hardcap/internal/model"
+	"github.com/hardcaporg/hardcap/internal/rpc/client"
+	"github.com/hardcaporg/hardcap/internal/rpc/common"
+	"log"
+	"net/rpc"
+	"os"
 
-    "github.com/k0kubun/pp/v3"
-    "github.com/urfave/cli/v2"
+	"github.com/k0kubun/pp/v3"
+	"github.com/urfave/cli/v2"
 )
 
 var rpcClient *rpc.Client
@@ -54,18 +54,18 @@ func main() {
 						Name:  "register",
 						Usage: "register hardware or virtual appliance",
 						Flags: []cli.Flag{
-                            &cli.StringFlag{Name: "name", Required: true},
-                            &cli.StringFlag{Name: "url", Required: true},
-                            },
+							&cli.StringFlag{Name: "name", Required: true},
+							&cli.StringFlag{Name: "url", Required: true},
+						},
 						Action: func(ctx *cli.Context) error {
-							reg := client.ApplianceClient(conn(ctx))
+							c := client.ApplianceClient(conn(ctx))
 
 							reply := &common.ApplianceRegisterReply{}
 							app := &model.Appliance{
-                                Name: ctx.String("name"),
-                                URL: ctx.String("url"),
-                            }
-							err := reg.Register(common.ApplianceRegisterArgs{Appliance: app}, reply)
+								Name: ctx.String("name"),
+								URL:  ctx.String("url"),
+							}
+							err := c.Register(common.ApplianceRegisterArgs{Appliance: app}, reply)
 							if err != nil {
 								return err
 							}
@@ -78,10 +78,33 @@ func main() {
 						Name:  "list",
 						Usage: "list appliances",
 						Action: func(ctx *cli.Context) error {
-							reg := client.ApplianceClient(conn(ctx))
+							c := client.ApplianceClient(conn(ctx))
 
 							reply := &common.ApplianceListReply{}
-							err := reg.List(common.ApplianceListArgs{}, reply)
+							err := c.List(common.ApplianceListArgs{}, reply)
+							if err != nil {
+								return err
+							}
+
+							pp.Println(reply.List)
+							return nil
+						},
+					},
+				},
+			},
+			{
+				Name:    "systems",
+				Aliases: []string{"sys"},
+				Usage:   "systems",
+				Subcommands: []*cli.Command{
+					{
+						Name:  "list",
+						Usage: "list systems",
+						Action: func(ctx *cli.Context) error {
+							c := client.SystemClient(conn(ctx))
+
+							reply := &common.SystemListReply{}
+							err := c.List(common.SystemListArgs{}, reply)
 							if err != nil {
 								return err
 							}
@@ -101,10 +124,10 @@ func main() {
 						Name:  "list",
 						Usage: "list registrations",
 						Action: func(ctx *cli.Context) error {
-							reg := client.RegistrationClient(conn(ctx))
+							c := client.RegistrationClient(conn(ctx))
 
 							reply := &common.RegistrationListReply{}
-							err := reg.List(common.RegistrationListArgs{}, reply)
+							err := c.List(common.RegistrationListArgs{}, reply)
 							if err != nil {
 								return err
 							}

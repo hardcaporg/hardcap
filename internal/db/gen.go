@@ -19,12 +19,14 @@ var (
 	Q            = new(Query)
 	Appliance    *appliance
 	Registration *registration
+	System       *system
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
 	Appliance = &Q.Appliance
 	Registration = &Q.Registration
+	System = &Q.System
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
@@ -32,6 +34,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		db:           db,
 		Appliance:    newAppliance(db, opts...),
 		Registration: newRegistration(db, opts...),
+		System:       newSystem(db, opts...),
 	}
 }
 
@@ -40,6 +43,7 @@ type Query struct {
 
 	Appliance    appliance
 	Registration registration
+	System       system
 }
 
 func (q *Query) Available() bool { return q.db != nil }
@@ -49,6 +53,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		db:           db,
 		Appliance:    q.Appliance.clone(db),
 		Registration: q.Registration.clone(db),
+		System:       q.System.clone(db),
 	}
 }
 
@@ -65,18 +70,21 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		db:           db,
 		Appliance:    q.Appliance.replaceDB(db),
 		Registration: q.Registration.replaceDB(db),
+		System:       q.System.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
 	Appliance    IApplianceDo
 	Registration IRegistrationDo
+	System       ISystemDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
 		Appliance:    q.Appliance.WithContext(ctx),
 		Registration: q.Registration.WithContext(ctx),
+		System:       q.System.WithContext(ctx),
 	}
 }
 

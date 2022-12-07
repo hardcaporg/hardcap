@@ -9,6 +9,7 @@ import (
     "github.com/hardcaporg/hardcap/internal/db"
     "github.com/hardcaporg/hardcap/internal/logging"
     "github.com/hardcaporg/hardcap/internal/middleware"
+    "github.com/hardcaporg/hardcap/internal/plugin"
     "github.com/hardcaporg/hardcap/internal/random"
     "github.com/hardcaporg/hardcap/internal/rpc/server"
     "github.com/hardcaporg/hardcap/internal/srv"
@@ -30,7 +31,25 @@ func main() {
 
 	db.Initialize()
 
-    err := server.Initialize(ctx)
+    appliance, err := plugin.StartAppliance(ctx, "python3", "plugins/appliance-libvirt/appliance.py")
+    if err != nil {
+        log.Fatal().Err(err).Msg("Cannot initialize appliance plugin")
+        return
+    }
+    defer appliance.Stop(ctx)
+
+    args := &plugin.ApplianceEnlistArgs{
+        URL:         "qemu:///system",
+        NamePattern: "^hardcap.*",
+    }
+    reply, err := appliance.Enlist(ctx, args)
+    if err != nil {
+        log.Fatal().Err(err).Msg("Cannot call appliance plugin")
+        return
+    }
+    fmt.Printf("%+v\n", reply)
+
+    err = server.Initialize(ctx)
     if err != nil {
         log.Fatal().Err(err).Msg("Cannot initialize RPC server")
         return

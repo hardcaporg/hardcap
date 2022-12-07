@@ -8,6 +8,7 @@ require (
 	github.com/ilyakaznacheev/cleanenv v1.4.0
 	github.com/jxskiss/base62 v1.1.0
 	github.com/k0kubun/pp/v3 v3.2.0
+	github.com/lzap/cborpc v0.0.0-20221207103553-1cc7c1e614ab
 	github.com/lzap/deagon v0.0.0-20221108193946-ebbec8ef187f
 	github.com/prometheus/client_golang v1.13.0
 	github.com/rs/zerolog v1.28.0
@@ -23,6 +24,7 @@ require (
 	github.com/ajg/form v1.5.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/fxamacker/cbor/v2 v2.4.0 // indirect
 	github.com/glebarez/go-sqlite v1.19.1 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
@@ -31,6 +33,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
+	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
 	golang.org/x/text v0.4.0 // indirect

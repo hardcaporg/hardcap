@@ -2,7 +2,8 @@ package middleware
 
 import (
 	"fmt"
-	"net/http"
+    "github.com/hardcaporg/hardcap/internal/plugin"
+    "net/http"
 	"runtime/debug"
 	"strconv"
 	"time"
@@ -53,6 +54,8 @@ func LoggerMiddleware(rootLogger *zerolog.Logger) func(next http.Handler) http.H
 			}()
 
 			ctx := ctxval.WithLogger(r.Context(), &logger)
+            ctx = plugin.WithPluginLogger(ctx, &logger)
+
 			next.ServeHTTP(ww, r.WithContext(ctx))
 		}
 		return http.HandlerFunc(fn)

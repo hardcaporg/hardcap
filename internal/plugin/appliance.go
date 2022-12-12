@@ -23,7 +23,7 @@ func StartAppliance(ctx context.Context, commandName string, commandArgs ...stri
     log := logger(ctx)
 
     log.Debug().Msgf("Starting plugin %s %v", commandName, commandArgs)
-    proc, err := cmd.NewCommand(WithPluginLogger(ctx, log), commandName, commandArgs...)
+    proc, err := cmd.NewCommand(ctx, commandName, commandArgs...)
     if err != nil {
         return nil, fmt.Errorf("cannot initialize plugin: %w", err)
     }

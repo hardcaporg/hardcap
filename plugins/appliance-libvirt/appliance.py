@@ -1,3 +1,5 @@
+import os
+import re
 import sys
 from struct import pack, unpack
 from typing import Callable, BinaryIO, Dict, Tuple
@@ -85,40 +87,42 @@ def multiply(args: Dict) -> Tuple[Dict, str]:
 
 def enlist(args: Dict) -> Tuple[Dict, str]:
     url = args["URL"]
-    name_pattern = args["NamePattern"]
     systems = []
     reply = {"Systems": systems}
 
     try:
-        conn = libvirt.openReadOnly("qemu:///system")
-    except libvirt.libvirtError:
-        return {}, 'failed to open connection to the hypervisor'
+        conn = libvirt.openReadOnly(url)
+    except libvirt.libvirtError as err:
+        return {}, f'failed to open connection to the hypervisor: {err}'
 
     try:
-        domain = conn.lookupByName("bohemia")
-    except libvirt.libvirtError:
-        return {}, 'failed to open connection to the hypervisor'
+        for domain in conn.listAllDomains():
+            if not re.match(args["NamePattern"], domain.name()):
+                continue
 
-    log("Domain 0: id %d running %s" % (domain.ID(), domain.OSType()))
-    log(domain.UUIDString())
-    log(domain.name())
-    # log(domain.XMLDesc())
+            log("Domain 0: id %d running %s" % (domain.ID(), domain.OSType()))
+            log(domain.UUIDString())
+            log(domain.name())
+            # log(domain.XMLDesc())
 
-    macs = []
-    xml = minidom.parseString(domain.XMLDesc())
-    for iface in xml.getElementsByTagName('domain')[0].getElementsByTagName("interface"):
-        if iface.getAttribute('type') != "network": continue
-        mac = iface.getElementsByTagName("mac")[0].getAttribute("address")
-        macs.append(mac)
+            macs = []
+            xml = minidom.parseString(domain.XMLDesc())
+            for iface in xml.getElementsByTagName('domain')[0].getElementsByTagName("interface"):
+                if iface.getAttribute('type') != "network": continue
+                mac = iface.getElementsByTagName("mac")[0].getAttribute("address")
+                macs.append(mac)
 
-    log(macs)
+            log(macs)
 
-    s = {
-        "Name": domain.name(),
-        "UID": domain.UUIDString(),
-        "MACs": macs,
-    }
-    systems.append(s)
+            s = {
+                "Name": domain.name(),
+                "UID": domain.UUIDString(),
+                "MACs": macs,
+            }
+            systems.append(s)
+
+    except libvirt.libvirtError as err:
+        return {}, f'failed to list intances: {err}'
 
     return reply, ""
 
@@ -128,17 +132,20 @@ server.register("Arith.Multiply", multiply)
 server.register("Appliance.Enlist", enlist)
 
 if __name__ == '__main__':
-    log("Starting libvirt appliance plugin")
-    while not sys.stdin.buffer.closed:
-        try:
-            req = Request.load(sys.stdin.buffer)
-            (result, error) = server.call(req.service_method(), req.args)
-            resp = Response(req, result, error)
-            resp.dumps(sys.stdout.buffer)
-            sys.stdout.buffer.flush()
-            log(f"Dispatched {req.service_method()} call")
-        except EOFError:
-            log("Pipeline closed, exiting")
-            break
-        except Exception:
-            raise
+    if os.environ["PLUGIN"]:
+        log("Starting libvirt appliance plugin")
+        while not sys.stdin.buffer.closed:
+            try:
+                req = Request.load(sys.stdin.buffer)
+                (result, error) = server.call(req.service_method(), req.args)
+                resp = Response(req, result, error)
+                resp.dumps(sys.stdout.buffer)
+                sys.stdout.buffer.flush()
+                log(f"Dispatched {req.service_method()} call")
+            except EOFError:
+                log("Pipeline closed, exiting")
+                break
+            except Exception:
+                raise
+    else:
+        log("Must be called from hardcap")

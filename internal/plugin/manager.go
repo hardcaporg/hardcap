@@ -4,6 +4,7 @@ import (
     "context"
     "fmt"
     "github.com/hardcaporg/hardcap/internal/ctxval"
+    "os"
 )
 
 var (
@@ -12,6 +13,11 @@ var (
 
 func StartAll(ctx context.Context) error {
     var err error
+
+    err = os.Setenv("PLUGIN", "1")
+    if err != nil {
+        return fmt.Errorf("cannot set plugin env variable: %w", err)
+    }
 
     Appliance, err = StartAppliance(ctx, "python3", "plugins/appliance-libvirt/appliance.py")
     if err != nil {

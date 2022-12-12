@@ -28,6 +28,7 @@ func main() {
 	config.Initialize("config/agent.env")
 	logging.Initialize()
     config.PrintConfig(ctx)
+    ctx = plugin.WithPluginLogger(ctx, &log.Logger)
 
 	db.Initialize()
 
